@@ -11,7 +11,7 @@ The one-shot LaNAS uses a pretrained supernet to predict the performance of a pr
 
 The training of supernet is same as the regular training except for that we apply a random mask at each iterations. 
 
-## Benchmarking on the supernet
+## Evaluating search algorithms on the supernet
 NASBench-101 has very limited architectures (~420K architectures), which can be easily predicted with some sort of predictor. Supernet can be a great alternative to solve this problem as it renders a search space having 10^21 architectures. Therefore, our supernet can also be used as a benchmark to evaluate different search algorithms. See Fig.6 in <a href="https://linnanwang.github.io/latent-actions.pdf">LaNAS paper</a>. Please check how LaNAS interacts with supernet, and samples the architecture and its accuracy.
 
 
