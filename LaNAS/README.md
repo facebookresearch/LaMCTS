@@ -25,7 +25,7 @@ We have strictly followed NASBench-101 guidlines in benchmarking the results, pl
 </p>
 
 # Performance of Searched Networks
-**CIFAR-10**: 99.01% top-1 using NASNet search space, SoTA result without using ImageNet or transfer learning.
+**CIFAR-10**: 99.03% top-1 using NASNet search space, SoTA result without using ImageNet or transfer learning.
 
 |     Model      | LaNet      | EfficientNet-B7       | GPIPE                 | PyramidNet      | XNAS           |
 | -------------- | ---------- | ---------             | ----------            | --------------  | -------------- |
