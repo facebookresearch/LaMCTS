@@ -29,7 +29,7 @@ The code for EfficientNet search space on ImageNet will be released later.
 **Applying LaNet to detection**: Compared to NAS-FCOS in CVPR-2020,
 |     Backbone      | Decoder      | FLOPS(G)       | AP    |
 | ----------------- | ------------ | -------------- |-------|
-|     LaNet         | FPN-FCOS     | 35.22          | 34.5  |
+|     LaNet         | FPN-FCOS     | 35.22          | 36.5  |
 |     MobileNetV2   | FPN-FCOS     | 105.4          | 31.2  |
 |     MobileNetV2   | NAS-FCOS     | 39.3           | 32.0  |
 
