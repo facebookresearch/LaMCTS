@@ -2,7 +2,7 @@
 LA-MCTS is a meta-algortihm that partitions the search space for black-box optimizations. LA-MCTS progressively learns to partition and explores promising regions in the search space, so that solvers such as Bayesian Optimizations (BO) can focus on promising subregions, mitigating the over-exploring issue in high-dimensional problems. 
 
 <p align="center">
-<img src='https://github.com/linnanwang/paper-image-repo/blob/master/LA-MCTS/meta_algorithms.png?raw=true' width="600">
+<img src='https://github.com/linnanwang/paper-image-repo/blob/master/LA-MCTS/meta_algorithms.png?raw=true' width="300">
 </p>
 
 Please reference the following publication when using this package. ArXiv <a href="https://arxiv.org/abs/2007.00708">link</a>.
