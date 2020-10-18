@@ -16,7 +16,7 @@ Linnan Wang (First Author), Yuandong Tian (Principal Investigator), Yiyang Zhao,
 This release contains our implementation of LA-MCTS and its application to Neural Architecture Search (LaNAS), but it can also be applied to large-scale hyper-parameter optimization, reinforcement learning, scheduling, optimizing computer systems, and many others.
 
 ## Neural Architecture Search (NAS) 
-- <a href="./LaNAS/LaNAS_NASBench101">**Evaluation on NASBench-101** </a>: Evaluating LaNAS on NASBench-101 without training models. 
+- <a href="./LaNAS/LaNAS_NASBench101">**Evaluation on NASBench-101** </a>: Evaluating LaNAS on NASBench-101 on your laptop without training models. 
 
 - <a href="./LaNAS/LaNet">**Our Searched Models, LaNet**</a>: SoTA results: • 99.03% on CIFAR-10 • 77.7% @ 240MFLOPS on ImageNet.
 
