@@ -33,7 +33,7 @@ The code for EfficientNet search space on ImageNet will be released later.
 |     MobileNetV2   | FPN-FCOS     | 105.4          | 31.2  |
 |     MobileNetV2   | NAS-FCOS     | 39.3           | 32.0  |
 
-<b>More results are coming. We will release the ImageNet model, search framework, training pipeline, and their applications on detection, segmentation soon; stay tuned.</b>
+<b>We will release the ImageNet model, search framework, training pipeline, and their applications on detection, segmentation soon; stay tuned.</b>
 
 
 
