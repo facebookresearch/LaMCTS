@@ -1,5 +1,4 @@
 CIFAR10 folder currently contains the test and training pipeline using the NASNet search space. 
-<b>We also provide instructions to port the training script toward the ImageNet.</b>
 
 The code for EfficientNet search space on ImageNet will be released later.
 
