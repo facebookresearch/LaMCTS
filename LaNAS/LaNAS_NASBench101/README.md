@@ -18,7 +18,9 @@ Please check <a href="https://github.com/linnanwang/AlphaX-NASBench101">AlphaX</
 
 ## About Predictor based Search Methods
 
-The simplest way to verify "why predictor not working" is to try it on the 10 dimensional continuous Ackley function (in functions.py in LA-MCTS).  
+<b>The simplest way to verify "why predictor not working" is to try it on the 10 dimensional continuous Ackley function (in functions.py in LA-MCTS). In practice, the search space has 10^30 architectures, you CANNOT predict every one.</b>
+
+<b>Why predictor works in NASNet or EfficientNet search space? </b>
 
 Recent works show very excellent results using a predictor such as Graph Neural Network. These approaches are the same as the surrogate model used in Bayesian Optimization, except for using different predictors. The main issue of predictor based methods is that these methods need to predict every architecture in the search space to perform well, and misses an acquisition (e.g. in Bayesian Optimization) to make the trade-off between exploration and exploitation. See this <a href="https://github.com/linnanwang/MLP-NASBench-101">repository</a>, a simple MLP can perform well (< 1000 samples) if it predicts on all the architectures in NASBench (4.2x10^5 architectures). However, the MLP performs the worst on a supernet that renders a search space of 3.5x10^21 architectures, because it is impossible to predict every architectures. See Fig.6 in <a href="https://linnanwang.github.io/latent-actions.pdf">LaNAS</a>.
 
