@@ -29,6 +29,6 @@ Please check <a href="https://github.com/linnanwang/AlphaX-NASBench101">AlphaX</
 In fact, the purpose of neural predictors, e.g. Graph Neural Network-based predictors, are very similar to the surrogate model (e.g. Gaussian Process) used in Bayesian Optimizations. The original NASBench-101 paper chose a set of very good baselines for comparisons.
 
 
-<b>Why predictor works in NASNet or EfficientNet search space?</b> These search space are constructed under very strong prior experience; and the final network accuracy can be boosted with bag of tricks listed <a href="https://github.com/facebookresearch/LaMCTS/tree/master/LaNAS/LaNet">here</a>.
+<b>Why predictor works in NASNet or EfficientNet search space?</b> These search space are constructed under very strong prior experience; and the final network accuracy can be hack with bag of tricks listed <a href="https://github.com/facebookresearch/LaMCTS/tree/master/LaNAS/LaNet">here</a>.
 
 In this implementation, we used MLP to predict samples to assign an architecture to a partition. This is an engineering simplification and can be replaced by a hit-and-run sampler, i.e. sampling from a convex polytope. However, we do replace this with a sampling method in one-shot LaNAS, i.e. Fig.6(c) in LaNAS; and also see LA-MCTS. Thank you.
