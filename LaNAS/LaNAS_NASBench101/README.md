@@ -20,7 +20,7 @@ Please check <a href="https://github.com/linnanwang/AlphaX-NASBench101">AlphaX</
 
 <b>The simplest way to verify "why predictor not working" is to try it on the 10 dimensional continuous Ackley function (in functions.py in LA-MCTS). In practice, the search space has 10^30 architectures, you CANNOT predict every one; and whatever predictor you use will fail.</b>
 
-<b>Why predictor works well on NASBench?</b> NASBench only has 4.2*10^5 networks, which can be predicted in a second. We show a simple MLP can perform well (< 1000 samples) if it predicts on all the architectures in NASBench. Besides, the following figure visualizes the distribution of network-accuracy on NASBench-101, y in log scale. So it is not surprising to see even using random search can find a reasonable result, since most networks are pretty good.
+<b>Why predictor works well on NASBench?</b>The main issue of predictor based methods is that these methods need to predict every architecture in the search space to perform well, and misses an acquisition (e.g. in Bayesian Optimization) to make the trade-off between exploration and exploitation. NASBench only has 4.2*10^5 networks, which can be predicted in a second. We show a simple MLP can perform well (< 1000 samples) if it predicts on all the architectures in NASBench. Besides, the following figure visualizes the distribution of network-accuracy on NASBench-101, y in log scale. So it is not surprising to see even using random search can find a reasonable result, since most networks are pretty good.
 
 <p align="center">
 <img src='https://github.com/linnanwang/paper-image-repo/blob/master/LaNAS/nasbench_distribution.png?raw=true' width="400">
@@ -30,7 +30,5 @@ In fact, the purpose of neural predictors, e.g. Graph Neural Network-based predi
 
 
 <b>Why predictor works in NASNet or EfficientNet search space?</b> These search space are constructed under very strong prior experience; and the final network accuracy can be boosted with bag of tricks listed <a href="https://github.com/facebookresearch/LaMCTS/tree/master/LaNAS/LaNet">here</a>.
-
-Recent works show very excellent results using a predictor such as Graph Neural Network. These approaches are the same as the surrogate model used in Bayesian Optimization, except for using different predictors. The main issue of predictor based methods is that these methods need to predict every architecture in the search space to perform well, and misses an acquisition (e.g. in Bayesian Optimization) to make the trade-off between exploration and exploitation. See this <a href="https://github.com/linnanwang/MLP-NASBench-101">repository</a>, (4.2x10^5 architectures). However, the MLP performs the worst on a supernet that renders a search space of 3.5x10^21 architectures, because it is impossible to predict every architectures. See Fig.6 in <a href="https://linnanwang.github.io/latent-actions.pdf">LaNAS</a>.
 
 In this implementation, we used MLP to predict samples to assign an architecture to a partition. This is an engineering simplification and can be replaced by a hit-and-run sampler, i.e. sampling from a convex polytope. However, we do replace this with a sampling method in one-shot LaNAS, i.e. Fig.6(c) in LaNAS; and also see LA-MCTS. Thank you.
