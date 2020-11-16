@@ -5,7 +5,7 @@
 # 
 from functions.functions import *
 from functions.mujoco_functions import *
-from MCTS import MCTS
+from lamcts import MCTS
 import argparse
 
 
