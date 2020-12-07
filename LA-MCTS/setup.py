@@ -10,7 +10,7 @@ setuptools.setup(
      name = 'LA-MCTS',  
      version = '0.1',
      author = "Linnan Wang",
-     author_email = "",
+     author_email = "wangnan318@gmail.com",
      description = "",
      long_description = long_description,
      long_description_content_type = "text/markdown",
