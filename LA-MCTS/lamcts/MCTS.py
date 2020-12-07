@@ -17,8 +17,8 @@ import pickle
 import os
 import random
 from datetime import datetime
-from Node import Node
-from utils import latin_hypercube, from_unit_cube
+from .Node import Node
+from .utils import latin_hypercube, from_unit_cube
 from torch.quasirandom import SobolEngine
 import torch
 
