@@ -27,7 +27,8 @@ This release contains our implementation of LA-MCTS and its application to Neura
 - <a href="./LaNAS/LaNet">**Training heuristics used**</a>: We list all tricks used in ImageNet training to reach SoTA. 
 
 ## Black-box optimization 
-- <a href="./LA-MCTS">**Performance with baselines**</a>: 1 minute evaluations of LA-MCTS v.s. Bayesian Optimization and Evolutionary Search.
+- <a href="./LA-MCTS">**Performance with baselines**</a>: 1 minute evaluations of LA-MCTS v.s. Bayesian Optimization and Evolutionary Search. </br>
+  **In the NeurIPS-2020 black box optimization challenge, the concept of LA-MCTS is used by 3rd (JetBrains) and 8th (KAIST) place teams. Check out the leaderboard <a href="https://bbochallenge.com/leaderboard">here</a>.**
 
 - <a href="./LA-MCTS">**Mujoco Experiments**</a>: LA-MCTS on Mujoco environment. 
 
