@@ -9,8 +9,6 @@ LA-MCTS is a new MCTS based derivative-free meta-solver. Compared to Bayesian op
 # Contributors
 Linnan Wang (First Author), Yuandong Tian (Principal Investigator), Yiyang Zhao, Saining Xie, Teng Li and Rodrigo Fonesca.
 
-\* **Linnan Wang is looking for a full-time position**. 
-
 # What's in this release?
 
 This release contains our implementation of LA-MCTS and its application to Neural Architecture Search (LaNAS), but it can also be applied to large-scale hyper-parameter optimization, reinforcement learning, scheduling, optimizing computer systems, and many others.
