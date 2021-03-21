@@ -4,7 +4,7 @@
 
 # Latent Action Monte Carlo Tree Search (LA-MCTS)
 
-LA-MCTS is a new MCTS based derivative-free meta-solver. Compared to Bayesian optimization, and evolutionary algorithm, it learns to partition the search space, thereby 🌟 finding a better solution with fewer samples.
+LA-MCTS is a new MCTS based derivative-free meta-solver. It learns to partition the search space, so that solvers such as Bayesian optimization or evolutionary algorithms can focus on a smaller region to find better solutions with fewer samples🌟.
 
 # Contributors
 Linnan Wang (First Author), Yuandong Tian (Principal Investigator), Yiyang Zhao, Saining Xie, Teng Li and Rodrigo Fonesca.
