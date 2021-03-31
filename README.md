@@ -52,6 +52,8 @@ One-shot LaNAS finds a reasonable solution in a few GPU days.
 
 <a href="https://linnanwang.github.io/latent-actions.pdf">Sample-Efficient Neural Architecture Search by Learning Action Space for Monte Carlo Tree Search</a> </br>
 Linnan Wang (Brown), Saining Xie (FAIR), Teng Li(FAIR), Rodrigo Fonesca (Brown), Yuandong Tian (FAIR)</br>
+TPAMI 2021 </br>
+
 
 ## From LaNAS to a generic solver LA-MCTS
 > Since LaNAS works very well on NAS datasets, e.g. NASBench-101, and the core of the algorithm can be easily generalized to other problems, we extend it to be a generic solver for black-box function optimization. 
