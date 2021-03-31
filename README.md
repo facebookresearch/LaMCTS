@@ -51,8 +51,8 @@ The second version of LaNAS, called one-shot LaNAS, uses a single one-shot subne
 One-shot LaNAS finds a reasonable solution in a few GPU days.  
 
 <a href="https://linnanwang.github.io/latent-actions.pdf">Sample-Efficient Neural Architecture Search by Learning Action Space for Monte Carlo Tree Search</a> </br>
-Linnan Wang (Brown), Saining Xie (FAIR), Teng Li(FAIR), Rodrigo Fonesca (Brown), Yuandong Tian (FAIR)</br>
 TPAMI 2021 </br>
+Linnan Wang (Brown), Saining Xie (FAIR), Teng Li(FAIR), Rodrigo Fonesca (Brown), Yuandong Tian (FAIR)</br>
 
 
 ## From LaNAS to a generic solver LA-MCTS
