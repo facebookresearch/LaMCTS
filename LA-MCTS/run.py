@@ -14,32 +14,10 @@ import argparse
 parser = argparse.ArgumentParser(description='Process inputs')
 parser.add_argument('--func', help='specify the test function')
 parser.add_argument('--dims', type=int, help='specify the problem dimensions')
+parser.add_argument('--random_shift_sigma', type=float, help='Randomly shifting the global optimal')
 parser.add_argument('--iterations', type=int, help='specify the iterations to collect in the search')
 
-
 args = parser.parse_args()
-
-f = None
-iteration = 0
-if args.func == 'ackley':
-    assert args.dims > 0
-    f = Ackley(dims =args.dims)
-elif args.func == 'levy':
-    assert args.dims > 0
-    f = Levy(dims = args.dims)
-elif args.func == 'lunar': 
-    f = Lunarlanding()
-elif args.func == 'swimmer':
-    f = Swimmer()
-elif args.func == 'hopper':
-    f = Hopper()
-else:
-    print('function not defined')
-    os._exit(1)
-
-assert f is not None
-assert args.iterations > 0
-
 
 # f = Ackley(dims = 10)
 # f = Levy(dims = 10)
@@ -47,19 +25,40 @@ assert args.iterations > 0
 # f = Hopper()
 # f = Lunarlanding()
 
+f = None
+iteration = 0
+if args.func == 'ackley':
+    assert args.dims > 0
+    f = Ackley(dims = args.dims, random_shift_sigma=args.random_shift_sigma)
+elif args.func == 'levy':
+    assert args.dims > 0
+    f = Levy(dims = args.dims, random_shift_sigma=args.random_shift_sigma)
+elif args.func == 'lunar':
+    f = Lunarlanding()
+elif args.func == 'swimmer':
+    f = Swimmer()
+elif args.func == 'hopper':
+    f = Hopper()
+else:
+    raise RuntimeError(f'function {args.func} undefined')
+
+assert f is not None
+assert args.iterations > 0
+
 agent = MCTS(
-             lb = f.lb,              # the lower bound of each problem dimensions
-             ub = f.ub,              # the upper bound of each problem dimensions
-             dims = f.dims,          # the problem dimensions
-             ninits = f.ninits,      # the number of random samples used in initializations 
-             func = f,               # function object to be optimized
-             Cp = f.Cp,              # Cp for MCTS
-             leaf_size = f.leaf_size, # tree leaf size
-             kernel_type = f.kernel_type, #SVM configruation
-             gamma_type = f.gamma_type    #SVM configruation
-             )
+            lb = f.lb,              # the lower bound of each problem dimensions
+            ub = f.ub,              # the upper bound of each problem dimensions
+            dims = f.dims,          # the problem dimensions
+            ninits = f.ninits,      # the number of random samples used in initializations 
+            func = f,               # function object to be optimized
+            Cp = f.Cp,              # Cp for MCTS
+            leaf_size = f.leaf_size, # tree leaf size
+            kernel_type = f.kernel_type, #SVM configruation
+            gamma_type = f.gamma_type    #SVM configruation
+            )
 
 agent.search(iterations = args.iterations)
+
 
 """
 FAQ:

@@ -254,10 +254,10 @@ class MCTS:
                         raise Exception("solver not implemented")
                     
                     self.backpropogate( leaf, value )
-            print("total samples:", len(self.samples) )
-            print("current best f(x):", np.absolute(self.curt_best_value) )
+            print(f"Current best f(x): {self.curt_best_value} at {self.curt_best_sample} (total samples: {len(self.samples)})")
             # print("current best x:", np.around(self.curt_best_sample, decimals=1) )
-            print("current best x:", self.curt_best_sample )
+
+        print(f"Final best f(x): {self.curt_best_value} at {self.curt_best_sample} (total samples: {len(self.samples)})")
 
 
 

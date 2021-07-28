@@ -38,7 +38,7 @@ class tracker:
             self.dump_trace()
 
 class Levy:
-    def __init__(self, dims=10):
+    def __init__(self, dims=10, random_shift_sigma=0.0):
         self.dims        = dims
         self.lb          = -10 * np.ones(dims)
         self.ub          =  10 * np.ones(dims)
@@ -50,24 +50,27 @@ class Levy:
         self.kernel_type = "poly"
         self.ninits      = 40
         self.gamma_type   = "auto"
-        print("initialize levy at dims:", self.dims)
+        # Randomly shift the location of the global minima.
+        self.x0 = np.random.uniform(-random_shift_sigma, random_shift_sigma, dims)
+        print(f"initialize levy at dims: {self.dims}, x0: {self.x0} (not known to the optimizer)")
         
     def __call__(self, x):
         assert len(x) == self.dims
         assert x.ndim == 1
         assert np.all(x <= self.ub) and np.all(x >= self.lb)
+
+        x = x - self.x0
         
         w = []
         for idx in range(0, len(x)):
             w.append( 1 + (x[idx] - 1) / 4 )
         w = np.array(w)
         
-        term1 = ( np.sin( np.pi*w[0] ) )**2;
+        term1 = ( np.sin( np.pi*w[0] ) )**2
         
-        term3 = ( w[-1] - 1 )**2 * ( 1 + ( np.sin( 2 * np.pi * w[-1] ) )**2 );
+        term3 = ( w[-1] - 1 )**2 * ( 1 + ( np.sin( 2 * np.pi * w[-1] ) )**2 )
         
-        
-        term2 = 0;
+        term2 = 0
         for idx in range(1, len(w) ):
             wi  = w[idx]
             new = (wi-1)**2 * ( 1 + 10 * ( np.sin( np.pi* wi + 1 ) )**2)
@@ -79,7 +82,7 @@ class Levy:
         return result
 
 class Ackley:
-    def __init__(self, dims=10):
+    def __init__(self, dims=10, random_shift_sigma=0.0):
         self.dims      = dims
         self.lb        = -5 * np.ones(dims)
         self.ub        =  10 * np.ones(dims)
@@ -92,13 +95,17 @@ class Ackley:
         self.ninits    = 40
         self.kernel_type = "rbf"
         self.gamma_type  = "auto"
-        
+        # Randomly shift the location of the global minima.
+        self.x0 = np.random.uniform(-random_shift_sigma, random_shift_sigma, dims)
+
+        print(f"initialize Ackley at dims: {self.dims}, x0: {self.x0} (not known to the optimizer)")
         
     def __call__(self, x):
         self.counter += 1
         assert len(x) == self.dims
         assert x.ndim == 1
         assert np.all(x <= self.ub) and np.all(x >= self.lb)
+        x = x - self.x0
         result = (-20*np.exp(-0.2 * np.sqrt(np.inner(x,x) / x.size )) -np.exp(np.cos(2*np.pi*x).sum() /x.size) + 20 +np.e )
         self.tracker.track( result )
                 
