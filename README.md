@@ -8,6 +8,8 @@ LA-MCTS is a new MCTS based derivative-free meta-solver. It learns to partition 
 
 Please 🌟star🌟  the repo if you like our work, thank you.
 
+A very nice re-implementation from FB engineers is available <a href="./LaNAS/LaNAS_NASBench101">**https://github.com/facebookresearch/LA-MCTS** </a>.
+
 # Contributors
 Linnan Wang (First Author), Yuandong Tian (Principal Investigator), Yiyang Zhao, Saining Xie, Teng Li and Rodrigo Fonesca.
 
