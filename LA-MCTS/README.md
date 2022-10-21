@@ -138,9 +138,8 @@ mv TuRBO-master/turbo ./turbo_1
 python run.py --func swimmer --iterations 1000
 ```
 
-<p align="center">
-<img src='https://github.com/linnanwang/paper-image-repo/blob/master/LA-MCTS/mujoco_performance.png?raw=true' width="1000">
-</p>
+![Mujoco Experiments](images/mujoco_experiments.png)
+
 
 ## Possible Extensions
 In MCTS.py line 229, the select returns a path and a leaf to bound the sampling space. We used ```get_sample_ratio_in_region``` in Classifier.py to acquire samples in the selected partition. Other sampler can also be used. 
