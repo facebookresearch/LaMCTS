@@ -36,9 +36,6 @@ assert args.iterations > 0
 
 # f = Ackley(dims = 10)
 # f = Levy(dims = 10)
-# f = Swimmer()
-# f = Hopper()
-# f = Lunarlanding()
 
 agent = MCTS(
              lb = f.lb,              # the lower bound of each problem dimensions
@@ -49,7 +46,8 @@ agent = MCTS(
              Cp = f.Cp,              # Cp for MCTS
              leaf_size = f.leaf_size, # tree leaf size
              kernel_type = f.kernel_type, #SVM configruation
-             gamma_type = f.gamma_type    #SVM configruation
+             gamma_type = f.gamma_type,    #SVM configruation
+             solver_type = 'turbo'
              )
 
 agent.search(iterations = args.iterations)

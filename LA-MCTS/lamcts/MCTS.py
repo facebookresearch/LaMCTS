@@ -25,7 +25,7 @@ import torch
 class MCTS:
     #############################################
 
-    def __init__(self, lb, ub, dims, ninits, func, Cp = 1, leaf_size = 20, kernel_type = "rbf", gamma_type = "auto"):
+    def __init__(self, lb, ub, dims, ninits, func, Cp = 1, leaf_size = 20, kernel_type = "rbf", gamma_type = "auto", solver_type = 'bo'):
         self.dims                    =  dims
         self.samples                 =  []
         self.nodes                   =  []
@@ -44,7 +44,7 @@ class MCTS:
         self.kernel_type             =  kernel_type
         self.gamma_type              =  gamma_type
         
-        self.solver_type             = 'bo' #solver can be 'bo' or 'turbo'
+        self.solver_type             =  solver_type #solver can be 'bo' or 'turbo'
         
         print("gamma_type:", gamma_type)
         
