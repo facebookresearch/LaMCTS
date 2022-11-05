@@ -27,12 +27,6 @@ if args.func == 'ackley':
 elif args.func == 'levy':
     assert args.dims > 0
     f = Levy(dims = args.dims)
-elif args.func == 'lunar': 
-    f = Lunarlanding()
-elif args.func == 'swimmer':
-    f = Swimmer()
-elif args.func == 'hopper':
-    f = Hopper()
 else:
     print('function not defined')
     os._exit(1)
