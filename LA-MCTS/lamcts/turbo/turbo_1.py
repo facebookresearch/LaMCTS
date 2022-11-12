@@ -88,6 +88,7 @@ class Turbo1:
         self.ub = ub
 
         # Settings
+        self.X_init = X_init
         self.n_init = n_init
         self.max_evals = max_evals
         self.batch_size = batch_size
