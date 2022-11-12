@@ -2,3 +2,4 @@ numpy
 torch
 scikit-learn
 matplotlib
+git+https://github.com/DavidWalz/diversipy.git
