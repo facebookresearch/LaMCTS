@@ -20,7 +20,7 @@ from sklearn.gaussian_process.kernels import ConstantKernel, Matern
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-from .turbo.turbo_1 import Turbo1
+from .turbo.turbo_1_test import Turbo1
 
 # the input will be samples!
 class Classifier():
@@ -341,11 +341,15 @@ class Classifier():
 
     def propose_samples_turbo(self, num_samples, path, func):
         #get samples around the selected partition
+        n_init = 30
+
         turbo1 = Turbo1(
+            path = path,
+            X_init = self.propose_rand_samples_sobol(30, path, func.lb, func.ub),
             f  = func,              # Handle to objective function
             lb = func.lb,           # Numpy array specifying lower bounds
             ub = func.ub,           # Numpy array specifying upper bounds
-            n_init = 30,            # Number of initial bounds from an Latin hypercube design
+            n_init = n_init,          # Number of initial bounds from an Latin hypercube design
             max_evals  = num_samples, # Maximum number of evaluations
             batch_size = 1,         # How large batch size TuRBO uses
             verbose=True,           # Print information from each batch
@@ -354,10 +358,9 @@ class Classifier():
             n_training_steps=50,    # Number of steps of ADAM to learn the hypers
             min_cuda=1024,          #  Run on the CPU for small datasets
             device="cpu",           # "cpu" or "cuda"
-            dtype="float32",        # float64 or float32
-            X_init = self.propose_rand_samples_sobol(30, path, func.lb, func.ub)
+            dtype="float32"        # float64 or float32
         )
-        print("sampled 30 for the initialization")
+        print(f"sampled {n_init} for the initialization")
     
         proposed_X, fX = turbo1.optimize( )
         fX = fX*-1
