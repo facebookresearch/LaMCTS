@@ -354,7 +354,8 @@ class Classifier():
             n_training_steps=50,    # Number of steps of ADAM to learn the hypers
             min_cuda=1024,          #  Run on the CPU for small datasets
             device="cpu",           # "cpu" or "cuda"
-            dtype="float32"        # float64 or float32
+            dtype="float32",        # float64 or float32
+            X_init = self.propose_rand_samples_sobol(30, path, func.lb, func.ub)
         )
         print("sampled 30 for the initialization")
     

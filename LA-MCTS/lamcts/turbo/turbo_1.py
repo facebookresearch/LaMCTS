@@ -49,6 +49,7 @@ class Turbo1:
 
     def __init__(
         self,
+        X_init,
         f,
         lb,
         ub,
@@ -61,7 +62,7 @@ class Turbo1:
         n_training_steps=50,
         min_cuda=1024,
         device="cpu",
-        dtype="float64",
+        dtype="float64"
     ):
 
         # Very basic input checks
@@ -245,17 +246,17 @@ class Turbo1:
             self._restart()
 
             # Generate and evalute initial design points
-            X_init = latin_hypercube(self.n_init, self.dim)
-            X_init = from_unit_cube(X_init, self.lb, self.ub)
-            fX_init = np.array([[self.f(x)] for x in X_init])
+            #X_init = latin_hypercube(self.n_init, self.dim)
+            #X_init = from_unit_cube(X_init, self.lb, self.ub)
+            fX_init = np.array([[self.f(x)] for x in self.X_init])
 
             # Update budget and set as initial data for this TR
             self.n_evals += self.n_init
-            self._X = deepcopy(X_init)
+            self._X = deepcopy(self.X_init)
             self._fX = deepcopy(fX_init)
 
             # Append data to the global history
-            self.X = np.vstack((self.X, deepcopy(X_init)))
+            self.X = np.vstack((self.X, deepcopy(self.X_init)))
             self.fX = np.vstack((self.fX, deepcopy(fX_init)))
 
             if self.verbose:
