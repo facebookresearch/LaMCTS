@@ -246,23 +246,7 @@ class Classifier():
         selected_cands = np.zeros((1, self.dims))
         seed   = np.random.randint(int(1e6))
         sobol  = SobolEngine(dimension = self.dims, scramble=True, seed=seed)
-        
-        # scale the samples to the entire search space
-        # ----------------------------------- #
-        # while len(selected_cands) <= nums_samples:
-        #     cands  = sobol.draw(100000).to(dtype=torch.float64).cpu().detach().numpy()
-        #     cands  = (ub - lb)*cands + lb
-        #     for node in path:
-        #         boundary = node[0].classifier.svm
-        #         if len(cands) == 0:
-        #             return []
-        #         cands = cands[ boundary.predict(cands) == node[1] ] # node[1] store the direction to go
-        #     selected_cands = np.append( selected_cands, cands, axis= 0)
-        #     print("total sampled:", len(selected_cands) )
-        # return cands
-        # ----------------------------------- #
-        #shrink the cands region
-        
+
         ratio_check, centers = self.get_sample_ratio_in_region(self.X, path)
         # no current samples located in the region
         # should not happen
@@ -349,7 +333,7 @@ class Classifier():
             f  = func,              # Handle to objective function
             lb = func.lb,           # Numpy array specifying lower bounds
             ub = func.ub,           # Numpy array specifying upper bounds
-            n_init = n_init,          # Number of initial bounds from an Latin hypercube design
+            n_init = n_init,          # Number of initial points to sample
             max_evals  = num_samples, # Maximum number of evaluations
             batch_size = 1,         # How large batch size TuRBO uses
             verbose=True,           # Print information from each batch
@@ -360,7 +344,6 @@ class Classifier():
             device="cpu",           # "cpu" or "cuda"
             dtype="float32"        # float64 or float32
         )
-        print(f"sampled {n_init} for the initialization")
     
         proposed_X, fX = turbo1.optimize( )
         fX = fX*-1
