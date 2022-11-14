@@ -49,6 +49,7 @@ class Turbo1:
 
     def __init__(
         self,
+        path,
         X_init,
         f,
         lb,
@@ -86,6 +87,7 @@ class Turbo1:
         self.dim = len(lb)
         self.lb = lb
         self.ub = ub
+        self.path = path
 
         # Settings
         self.X_init = X_init
@@ -151,6 +153,70 @@ class Turbo1:
             self.length /= 2.0
             self.failcount = 0
 
+    def propose_rand_samples(self, nums_samples, lb, ub):
+        x = np.random.uniform(lb, ub, size = (nums_samples, self.dim) )
+        return x
+
+    def get_sample_ratio_in_region( self, cands, path ):
+        total = len(cands)
+        for node in path:
+            boundary = node[0].classifier.svm
+            if len(cands) == 0:
+                return 0, np.array([])
+            assert len(cands) > 0
+            cands = cands[ boundary.predict( cands ) == node[1] ] 
+            # node[1] store the direction to go
+        ratio = len(cands) / total
+        assert len(cands) <= total
+        return ratio, cands
+
+    def propose_rand_samples_sobol(self, nums_samples, path, lb, ub):
+        
+        #rejected sampling
+        selected_cands = np.zeros((1, self.dim))
+        seed   = np.random.randint(int(1e6))
+        sobol  = SobolEngine(dimension = self.dim, scramble=True, seed=seed)
+
+        ratio_check, centers = self.get_sample_ratio_in_region(self.X, path)
+        # no current samples located in the region
+        # should not happen
+        # print("ratio check:", ratio_check, len(self.X) )
+        # assert ratio_check > 0
+        if ratio_check == 0 or len(centers) == 0:
+            print('full rand')
+            return self.propose_rand_samples( nums_samples, lb, ub )
+        
+        lb_    = None
+        ub_    = None
+        
+        final_cands = []
+        for center in centers:
+            center = self.X[ np.random.randint( len(self.X) ) ]
+            cands  = sobol.draw(2000).to(dtype=torch.float64).cpu().detach().numpy()
+            ratio  = 1
+            L      = 0.0001
+            Blimit = np.max(ub - lb)
+            
+            while ratio == 1 and L < Blimit:                    
+                lb_    = np.clip( center - L/2, lb, ub )
+                ub_    = np.clip( center + L/2, lb, ub )
+                cands_ = deepcopy( cands )
+                cands_ = (ub_ - lb_)*cands_ + lb_
+                ratio, cands_ = self.get_sample_ratio_in_region(cands_, path)
+                if ratio < 1:
+                    final_cands.extend( cands_.tolist() )
+                L = L*2
+        final_cands      = np.array( final_cands )
+        if len(final_cands) > nums_samples:
+            final_cands_idx  = np.random.choice( len(final_cands), nums_samples )
+            return final_cands[final_cands_idx]
+        else:
+            if len(final_cands) == 0:
+                print('full rand')
+                return self.propose_rand_samples( nums_samples, lb, ub )
+            else:
+                return final_cands
+
     def _create_candidates(self, X, fX, length, n_training_steps, hypers):
         """Generate candidates assuming X has been scaled to [0,1]^d."""
         # Pick the center as the point with the smallest function values
@@ -187,21 +253,7 @@ class Turbo1:
         lb = np.clip(x_center - weights * length / 2.0, 0.0, 1.0)
         ub = np.clip(x_center + weights * length / 2.0, 0.0, 1.0)
 
-        # Draw a Sobolev sequence in [lb, ub]
-        seed = np.random.randint(int(1e6))
-        sobol = SobolEngine(self.dim, scramble=True, seed=seed)
-        pert = sobol.draw(self.n_cand).to(dtype=dtype, device=device).cpu().detach().numpy()
-        pert = lb + (ub - lb) * pert
-
-        # Create a perturbation mask
-        prob_perturb = min(20.0 / self.dim, 1.0)
-        mask = np.random.rand(self.n_cand, self.dim) <= prob_perturb
-        ind = np.where(np.sum(mask, axis=1) == 0)[0]
-        mask[ind, np.random.randint(0, self.dim - 1, size=len(ind))] = 1
-
-        # Create candidate points
-        X_cand = x_center.copy() * np.ones((self.n_cand, self.dim))
-        X_cand[mask] = pert[mask]
+        X_cand = self.propose_rand_samples_sobol(self.n_cand, self.path, lb, ub)
 
         # Figure out what device we are running on
         if len(X_cand) < self.min_cuda:
@@ -237,67 +289,67 @@ class Turbo1:
 
     def optimize(self):
         """Run the full optimization process."""
-        while self.n_evals < self.max_evals:
-            if len(self._fX) > 0 and self.verbose:
-                n_evals, fbest = self.n_evals, self._fX.min()
-                print(f"{n_evals}) Restarting with fbest = {fbest:.4}")
+        if len(self._fX) > 0 and self.verbose:
+            n_evals, fbest = self.n_evals, self._fX.min()
+            print(f"{n_evals}) Restarting with fbest = {fbest:.4}")
+            sys.stdout.flush()
+
+        # Initialize parameters
+        self._restart()
+        
+        # Generate and evalute initial design points
+        fX_init = np.array([[self.f(x)] for x in self.X_init])
+        
+        # Update budget and set as initial data for this TR
+        self.n_evals += self.n_init
+        self._X = deepcopy(self.X_init)
+        self._fX = deepcopy(fX_init)
+        
+        # Append data to the global history
+        self.X = np.vstack((self.X, deepcopy(self.X_init)))
+        self.fX = np.vstack((self.fX, deepcopy(fX_init)))
+        
+        if self.verbose:
+            fbest = self._fX.min()
+            print(f"Starting from fbest = {fbest:.4}")
+            sys.stdout.flush()
+        
+        # Thompson sample to get next suggestions
+        while self.n_evals < self.max_evals and self.length >= self.length_min:
+            
+            # Warp inputs
+            X = to_unit_cube(deepcopy(self._X), self.lb, self.ub)
+            
+            # Standardize values
+            fX = deepcopy(self._fX).ravel()
+            
+            # Create th next batch
+            X_cand, y_cand, _ = self._create_candidates(
+                X, fX, length=self.length, n_training_steps=self.n_training_steps, hypers={}
+            )
+            X_next = self._select_candidates(X_cand, y_cand)
+            
+            # Undo the warping
+            X_next = from_unit_cube(X_next, self.lb, self.ub)
+            
+            # Evaluate batch
+            fX_next = np.array([[self.f(x)] for x in X_next])
+            
+            # Update trust region
+            self._adjust_length(fX_next)
+            
+            # Update budget and append data
+            self.n_evals += self.batch_size
+            self._X = np.vstack((self._X, X_next))
+            self._fX = np.vstack((self._fX, fX_next))
+            
+            if self.verbose and fX_next.min() < self.fX.min():
+                n_evals, fbest = self.n_evals, fX_next.min()
+                print(f"{n_evals}) New best: {fbest:.4}")
                 sys.stdout.flush()
-
-            # Initialize parameters
-            self._restart()
-
-            # Generate and evalute initial design points
-            #X_init = latin_hypercube(self.n_init, self.dim)
-            #X_init = from_unit_cube(X_init, self.lb, self.ub)
-            fX_init = np.array([[self.f(x)] for x in self.X_init])
-
-            # Update budget and set as initial data for this TR
-            self.n_evals += self.n_init
-            self._X = deepcopy(self.X_init)
-            self._fX = deepcopy(fX_init)
-
+            
             # Append data to the global history
-            self.X = np.vstack((self.X, deepcopy(self.X_init)))
-            self.fX = np.vstack((self.fX, deepcopy(fX_init)))
-
-            if self.verbose:
-                fbest = self._fX.min()
-                print(f"Starting from fbest = {fbest:.4}")
-                sys.stdout.flush()
-
-            # Thompson sample to get next suggestions
-            while self.n_evals < self.max_evals and self.length >= self.length_min:
-                # Warp inputs
-                X = to_unit_cube(deepcopy(self._X), self.lb, self.ub)
-
-                # Standardize values
-                fX = deepcopy(self._fX).ravel()
-
-                # Create th next batch
-                X_cand, y_cand, _ = self._create_candidates(
-                    X, fX, length=self.length, n_training_steps=self.n_training_steps, hypers={}
-                )
-                X_next = self._select_candidates(X_cand, y_cand)
-
-                # Undo the warping
-                X_next = from_unit_cube(X_next, self.lb, self.ub)
-
-                # Evaluate batch
-                fX_next = np.array([[self.f(x)] for x in X_next])
-
-                # Update trust region
-                self._adjust_length(fX_next)
-
-                # Update budget and append data
-                self.n_evals += self.batch_size
-                self._X = np.vstack((self._X, X_next))
-                self._fX = np.vstack((self._fX, fX_next))
-
-                if self.verbose and fX_next.min() < self.fX.min():
-                    n_evals, fbest = self.n_evals, fX_next.min()
-                    print(f"{n_evals}) New best: {fbest:.4}")
-                    sys.stdout.flush()
-
-                # Append data to the global history
-                self.X = np.vstack((self.X, deepcopy(X_next)))
-                self.fX = np.vstack((self.fX, deepcopy(fX_next)))
+            self.X = np.vstack((self.X, deepcopy(X_next)))
+            self.fX = np.vstack((self.fX, deepcopy(fX_next)))
+        
+        return self.X, self.fX
