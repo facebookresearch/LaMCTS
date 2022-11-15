@@ -209,7 +209,7 @@ class Turbo1:
         ratio = 0
 
         while len(final_cands) < self.n_cand and ratio < .9:
-            print("don't get stuck please")
+            #print(f"need: {len(final_cands)/self.n_cand}")
             seed = np.random.randint(int(1e6))
             sobol = SobolEngine(self.dim, scramble=True, seed=seed)
             pert = sobol.draw(self.n_cand).to(dtype=dtype, device=device).cpu().detach().numpy()
@@ -304,7 +304,6 @@ class Turbo1:
         
         # Thompson sample to get next suggestions
         while self.n_evals < self.max_evals and self.length >= self.length_min:
-            
             # Warp inputs
             X = to_unit_cube(deepcopy(self._X), self.lb, self.ub)
             
