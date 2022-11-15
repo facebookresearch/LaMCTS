@@ -19,7 +19,7 @@ import torch
 from torch.quasirandom import SobolEngine
 
 from .gp import train_gp
-from .utils import from_unit_cube, latin_hypercube, to_unit_cube
+from .utils import from_unit_cube, to_unit_cube
 
 
 class Turbo1:
@@ -153,12 +153,9 @@ class Turbo1:
             self.length /= 2.0
             self.failcount = 0
 
-    def propose_rand_samples(self, nums_samples, lb, ub):
-        x = np.random.uniform(lb, ub, size = (nums_samples, self.dim) )
-        return x
-
     def get_sample_ratio_in_region( self, cands, path ):
         total = len(cands)
+
         for node in path:
             boundary = node[0].classifier.svm
             if len(cands) == 0:
@@ -166,56 +163,10 @@ class Turbo1:
             assert len(cands) > 0
             cands = cands[ boundary.predict( cands ) == node[1] ] 
             # node[1] store the direction to go
+        
         ratio = len(cands) / total
         assert len(cands) <= total
         return ratio, cands
-
-    def propose_rand_samples_sobol(self, nums_samples, path, lb, ub):
-        
-        #rejected sampling
-        selected_cands = np.zeros((1, self.dim))
-        seed   = np.random.randint(int(1e6))
-        sobol  = SobolEngine(dimension = self.dim, scramble=True, seed=seed)
-
-        ratio_check, centers = self.get_sample_ratio_in_region(self.X, path)
-        # no current samples located in the region
-        # should not happen
-        # print("ratio check:", ratio_check, len(self.X) )
-        # assert ratio_check > 0
-        if ratio_check == 0 or len(centers) == 0:
-            print('full rand')
-            return self.propose_rand_samples( nums_samples, lb, ub )
-        
-        lb_    = None
-        ub_    = None
-        
-        final_cands = []
-        for center in centers:
-            center = self.X[ np.random.randint( len(self.X) ) ]
-            cands  = sobol.draw(2000).to(dtype=torch.float64).cpu().detach().numpy()
-            ratio  = 1
-            L      = 0.0001
-            Blimit = np.max(ub - lb)
-            
-            while ratio == 1 and L < Blimit:                    
-                lb_    = np.clip( center - L/2, lb, ub )
-                ub_    = np.clip( center + L/2, lb, ub )
-                cands_ = deepcopy( cands )
-                cands_ = (ub_ - lb_)*cands_ + lb_
-                ratio, cands_ = self.get_sample_ratio_in_region(cands_, path)
-                if ratio < 1:
-                    final_cands.extend( cands_.tolist() )
-                L = L*2
-        final_cands      = np.array( final_cands )
-        if len(final_cands) > nums_samples:
-            final_cands_idx  = np.random.choice( len(final_cands), nums_samples )
-            return final_cands[final_cands_idx]
-        else:
-            if len(final_cands) == 0:
-                print('full rand')
-                return self.propose_rand_samples( nums_samples, lb, ub )
-            else:
-                return final_cands
 
     def _create_candidates(self, X, fX, length, n_training_steps, hypers):
         """Generate candidates assuming X has been scaled to [0,1]^d."""
@@ -253,7 +204,44 @@ class Turbo1:
         lb = np.clip(x_center - weights * length / 2.0, 0.0, 1.0)
         ub = np.clip(x_center + weights * length / 2.0, 0.0, 1.0)
 
-        X_cand = self.propose_rand_samples_sobol(self.n_cand, self.path, lb, ub)
+        # Draw a Sobolev sequence in [lb, ub]
+        final_cands = []
+        ratio = 0
+
+        while len(final_cands) < self.n_cand and ratio < .9:
+            print("don't get stuck please")
+            seed = np.random.randint(int(1e6))
+            sobol = SobolEngine(self.dim, scramble=True, seed=seed)
+            pert = sobol.draw(self.n_cand).to(dtype=dtype, device=device).cpu().detach().numpy()
+            pert = lb + (ub - lb) * pert
+
+            # Create a perturbation mask
+            prob_perturb = min(20.0 / self.dim, 1.0)
+            mask = np.random.rand(self.n_cand, self.dim) <= prob_perturb
+            ind = np.where(np.sum(mask, axis=1) == 0)[0]
+            mask[ind, np.random.randint(0, self.dim - 1, size=len(ind))] = 1
+
+            # Create candidate points
+            X_cand = x_center.copy() * np.ones((self.n_cand, self.dim))
+            X_cand[mask] = pert[mask]
+
+            ratio, X_cand = self.get_sample_ratio_in_region(from_unit_cube(X_cand, np.squeeze(lb, axis=0), np.squeeze(ub, axis=0)), self.path)
+
+            final_cands.extend(X_cand.tolist())
+
+            if len(final_cands) > self.n_cand:
+                final_cands = np.array(final_cands)
+                final_cands_idx  = np.random.choice( len(final_cands), self.n_cand)
+                final_cands = final_cands[final_cands_idx]
+
+        X_cand = np.array(final_cands)
+        X_cand = to_unit_cube(X_cand, np.squeeze(lb, axis=0), np.squeeze(ub, axis=0))
+        
+        # import matplotlib.pyplot as plt
+        # if ratio < .8:
+        #     print(f'ratio: {ratio}')
+        #     plt.scatter(X_cand.T[0], X_cand.T[1])
+        #     plt.show()
 
         # Figure out what device we are running on
         if len(X_cand) < self.min_cuda:
