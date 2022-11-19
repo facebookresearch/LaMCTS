@@ -249,7 +249,9 @@ class Classifier():
             cands     = sobol.draw(count).to(dtype=torch.float64).cpu().detach().numpy()
         
             cands     = (ub_ - lb_)*cands + lb_
-            ratio, cands = self.get_sample_ratio_in_region(cands, path)
+            ratio, cands = self.get_sample_ratio_in_region(cands, path)ode7     node8     
+node6  is good:False  is leaf:True    val:-12.2440        uct:12.1250        sp/n:7/7        parent:node2      kids:
+node7  is good:True   is leaf:True    val:-11.8340  
             samples_count = len( cands )
         
         #extract candidates 

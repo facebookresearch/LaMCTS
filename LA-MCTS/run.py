@@ -39,6 +39,9 @@ agent = MCTS(
              ub = f.ub,              # the upper bound of each problem dimensions
              dims = f.dims,          # the problem dimensions
              ninits = f.ninits,      # the number of random samples used in initializations 
+             A_ineq = np.array([np.ones(args.dims)]),
+             b_ineq = np.array([1]),
+             A_eq = None, b_eq = None,
              func = f,               # function object to be optimized
              Cp = f.Cp,              # Cp for MCTS
              leaf_size = f.leaf_size, # tree leaf size
