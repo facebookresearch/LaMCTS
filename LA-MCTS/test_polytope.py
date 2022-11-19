@@ -37,6 +37,9 @@ assert args.iterations > 0
 agent = MCTS(
              lb = f.lb,              # the lower bound of each problem dimensions
              ub = f.ub,              # the upper bound of each problem dimensions
+             A_ineq = np.array([np.ones(args.dims)]),
+             b_ineq = np.array([10]),
+             A_eq = None, b_eq = None,
              dims = f.dims,          # the problem dimensions
              ninits = f.ninits,      # the number of random samples used in initializations 
              func = f,               # function object to be optimized
@@ -44,11 +47,11 @@ agent = MCTS(
              leaf_size = f.leaf_size, # tree leaf size
              kernel_type = f.kernel_type, #SVM configruation
              gamma_type = f.gamma_type,    #SVM configruation
-             solver_type = 'turbo'
+             solver_type = 'bo'
              )
 
 agent.search(iterations = args.iterations)
-
+print(np.array([x[0] for x in agent.ROOT.bag]))
 """
 FAQ:
 

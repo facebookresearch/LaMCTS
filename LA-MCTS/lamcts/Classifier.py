@@ -175,7 +175,23 @@ class Classifier():
     
     def get_sample_ratio_in_region( self, cands, path ):
         total = len(cands)
-        for node in path:
+        # Filter the candidates matching the global constraint first
+        global_constrs = path[0]
+        #print(cands)
+        if global_constrs["A_ineq"] is not None and global_constrs["b_ineq"] is not None:
+            A = global_constrs["A_ineq"]
+            b = global_constrs["b_ineq"]
+            valid = [ np.all(A@x <= b) for x in cands]
+            #print(valid)
+            #print(cands[valid,:])
+            cands = cands[valid,:]
+        # likely infeasible??
+        # Maybe this won't be used.
+        elif global_constrs["A_eq"] is not None and global_constrs["b_eq"] is not None: 
+            A = global_constrs["A_eq"]
+            b = global_constrs["b_eq"]
+            cands = cands[[A@x <= b for x in cands],:]
+        for node in path[1:]: # skip global constraint
             boundary = node[0].classifier.svm
             if len(cands) == 0:
                 return 0, np.array([])

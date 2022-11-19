@@ -22,16 +22,29 @@ from .utils import latin_hypercube, from_unit_cube
 from torch.quasirandom import SobolEngine
 import torch
 
+from diversipy import polytope
 class MCTS:
     #############################################
 
-    def __init__(self, lb, ub, dims, ninits, func, Cp = 1, leaf_size = 20, kernel_type = "rbf", gamma_type = "auto", solver_type = 'bo'):
+    def __init__(self, 
+        lb, ub, 
+        A_eq, b_eq, A_ineq, b_ineq, 
+        ninits, func, dims,
+        Cp = 1, leaf_size = 20, kernel_type = "rbf", gamma_type = "auto", solver_type = 'bo'):
         self.dims                    =  dims
         self.samples                 =  []
         self.nodes                   =  []
         self.Cp                      =  Cp
         self.lb                      =  lb
         self.ub                      =  ub
+        # incorporate polytope constraints
+        # A_eq, b_eq describe constraints of form A_eq @ x = b_eq
+        # A_ineq, b_ineq describe constraints of form A_ineq @ x = b_ineq
+        self.A_eq                    = A_eq
+        self.b_eq                    = b_eq
+        self.A_ineq                  = A_ineq
+        self.b_ineq                  = b_ineq
+        # -----------------------------------
         self.ninits                  =  ninits
         self.func                    =  func
         self.curt_best_value         =  float("-inf")
@@ -52,6 +65,11 @@ class MCTS:
         root = Node( parent = None, dims = self.dims, reset_id = True, kernel_type = self.kernel_type, gamma_type = self.gamma_type )
         self.nodes.append( root )
         
+        # need to pass information about the global linear constraints
+        # down to the Classifier object...
+        # Represent as a dictionary of the matrices/vectors defining the linear constraints.
+        self.GLOBAL_CONSTRAINT = {"A_eq": A_eq, "b_eq": b_eq, "A_ineq": A_ineq, "b_ineq": b_ineq}
+
         self.ROOT = root
         self.CURT = self.ROOT
         self.init_train()
@@ -136,13 +154,49 @@ class MCTS:
         self.sample_counter += 1
         self.samples.append( (sample, value) )
         return value
-        
+    
+    def constraint_sample(self,n):
+        # no inequality constraints, do have equality constraint
+        if self.A_ineq is None and self.b_ineq is None and self.A_eq is not None and self.b_eq is not None:
+            samples = polytope.sample(
+                    n_points=n,
+                    lower=self.lb,
+                    upper=self.ub,
+                    A2=self.A_eq,
+                    b2=self.b_eq
+            )
+        if self.A_ineq is not None and self.b_ineq is not None and self.A_eq is None and self.b_eq is None:
+            samples = polytope.sample(
+                    n_points=n,
+                    lower=self.lb,
+                    upper=self.ub,
+                    A1=self.A_ineq,
+                    b1=self.b_ineq
+            )
+        else: # just assume for now everything provided
+            samples = polytope.sample(
+                    n_points=n,
+                    lower=self.lb,
+                    upper=self.ub,
+                    A1=self.A_ineq,
+                    b1=self.b_ineq,
+                    A2=self.A_eq,
+                    b2=self.b_eq
+            )
+        return samples
+
     def init_train(self):
-        
         # here we use latin hyper space to generate init samples in the search space
-        init_points = latin_hypercube(self.ninits, self.dims)
-        init_points = from_unit_cube(init_points, self.lb, self.ub)
-        
+        # use only if no polytope constraints provided
+        #if (self.A_eq):
+        #    init_points = latin_hypercube(self.ninits, self.dims)
+        #    init_points = from_unit_cube(init_points, self.lb, self.ub)
+
+        # use diversipy polytope sampler
+        # TODO: can add hopsy later?
+        init_points = self.constraint_sample(self.ninits)
+        print(init_points)
+
         for point in init_points:
             self.collect_samples(point)
         
@@ -209,7 +263,7 @@ class MCTS:
     def select(self):
         self.reset_to_root()
         curt_node = self.ROOT
-        path      = [ ]
+        path      = [self.GLOBAL_CONSTRAINT] # Always include the global constraint information!
         
         while curt_node.is_leaf() == False:
             UCT = []
